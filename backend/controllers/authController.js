@@ -19,11 +19,12 @@ export const login = async (req, res) => {
     }).select('+password');
 
     if (!user) {
+
       return res.status(401).json({ errors: ['Invalid credentials'] });
     }
-
+    
     const isMatch = await bcrypt.compare(password, user.password);
-
+    
     if (!isMatch) {
       return res.status(401).json({ errors: ['Invalid credentials'] });
     }
@@ -36,8 +37,6 @@ export const login = async (req, res) => {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000
     });
 
@@ -78,8 +77,7 @@ export const register = async (req, res) => {
 
     
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-
+    const hashedPassword = await bcrypt.hash(password, 10);
     
 
     const user = await User.create({
@@ -87,23 +85,22 @@ export const register = async (req, res) => {
       email: email.toLowerCase(),
       password: hashedPassword
     });
-
     
-
-    
-
+  
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 
+    
+    
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000
     });
+
+    
 
     res.status(201).json({
       success: true,

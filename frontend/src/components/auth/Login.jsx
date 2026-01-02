@@ -44,6 +44,8 @@ const Login = () => {
       const user = await authService.login(formData.email, formData.password);
 
       if (user) {
+        console.log(user);
+        
         navigate("/home", { replace: true });
       }
     } catch (error) {
